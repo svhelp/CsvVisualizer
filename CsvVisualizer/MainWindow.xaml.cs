@@ -23,6 +23,8 @@ namespace CsvVisualizer
         public MainWindow()
         {
             InitializeComponent();
+
+            DataContext = new MainVindowViewModel();
         }
     }
 }

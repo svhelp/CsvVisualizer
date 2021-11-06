@@ -4,9 +4,42 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CsvVisualizer"
+        xmlns:syncfusion="clr-namespace:Syncfusion.UI.Xaml.Charts;assembly=Syncfusion.SfChart.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <TextBox Text="{Binding Path=CsvPath}"/>
+        <TextBox Grid.Row="1"/>
+
+        <ComboBox Grid.Column="1" ItemsSource="{Binding Path=Headers}" SelectedValue="{Binding Path=SelectedHeader}" />
+
+        <syncfusion:SfChart Grid.Column="1" Grid.Row="1">
+
+            <syncfusion:SfChart.PrimaryAxis>
+
+                <syncfusion:CategoryAxis Header="{Binding SelectedHeader}" />
+
+            </syncfusion:SfChart.PrimaryAxis>
+
+            <syncfusion:SfChart.SecondaryAxis>
+
+                <syncfusion:NumericalAxis Header="Height(in cm)" />
+
+            </syncfusion:SfChart.SecondaryAxis>
+
+            <syncfusion:LineSeries  ItemsSource="{Binding SingleChart}" XBindingPath="Time" YBindingPath="Value" >
+            </syncfusion:LineSeries>
+
+        </syncfusion:SfChart>
 
     </Grid>
 </Window>
