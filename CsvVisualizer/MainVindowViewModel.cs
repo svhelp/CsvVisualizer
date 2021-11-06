@@ -19,8 +19,7 @@ namespace CsvVisualizer
         private string csvPath;
         private ObservableCollection<string> headers;
         private string selectedHeader;
-        private ObservableCollection<SfChart> charts;
-        private ObservableCollection<ChartPointData> singleChart;
+        private ObservableCollection<ChartData> charts;
 
         public string CsvPath
         {
@@ -50,20 +49,11 @@ namespace CsvVisualizer
             }
         }
 
-        public ObservableCollection<SfChart> Charts
+        public ObservableCollection<ChartData> Charts
         {
-            get => charts ?? (charts = new ObservableCollection<SfChart>()); set
+            get => charts ?? (charts = new ObservableCollection<ChartData>()); set
             {
                 charts = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ObservableCollection<ChartPointData> SingleChart
-        {
-            get => singleChart ?? (singleChart = new ObservableCollection<ChartPointData>()); set
-            {
-                singleChart = value;
                 OnPropertyChanged();
             }
         }
@@ -95,9 +85,11 @@ namespace CsvVisualizer
 
             SelectedHeader = Headers[0];
 
+            Charts.Clear();
+
             foreach (var header in Headers)
             {
-                if (header == SelectedHeader || header != Headers[1])
+                if (header == SelectedHeader)
                 {
                     continue;
                 }
@@ -108,14 +100,13 @@ namespace CsvVisualizer
             }
         }
 
-        private SfChart GetChartModel(string targetHeader)
+        private ChartData GetChartModel(string targetHeader)
         {
             int timeIndex = Headers.IndexOf(SelectedHeader);
             int dataIndex = Headers.IndexOf(targetHeader);
             int pointsCount = CsvData[0].Count;
 
-            SingleChart.Clear();
-            var points = new List<ChartPointData>();
+            var chartPoints = new List<ChartPointData>();
 
             for (int i = 0; i < pointsCount - 1; i++)
             {
@@ -125,41 +116,16 @@ namespace CsvVisualizer
                     Value = double.Parse(CsvData[dataIndex][i], NumberStyles.Any, CultureInfo.InvariantCulture),
                 };
 
-                points.Add(point);
-                SingleChart.Add(point);
+                chartPoints.Add(point);
             }
 
-            SfChart chart = new SfChart();
-
-            //Adding horizontal axis to the chart 
-
-            CategoryAxis primaryAxis = new CategoryAxis();
-
-            primaryAxis.Header = SelectedHeader;
-
-            chart.PrimaryAxis = primaryAxis;
-
-
-            //Adding vertical axis to the chart 
-
-            NumericalAxis secondaryAxis = new NumericalAxis();
-
-            secondaryAxis.Header = targetHeader;
-
-            chart.SecondaryAxis = secondaryAxis;
-
-
-            //Initialize the two series for SfChart
-            LineSeries series = new LineSeries();
-
-            series.ItemsSource = points;
-            series.XBindingPath = "Time";
-            series.YBindingPath = "Value";
-
-            //Adding Series to the Chart Series Collection
-            chart.Series.Add(series);
-
-            return chart;
+            return new ChartData
+            {
+                Title = targetHeader,
+                XName = SelectedHeader,
+                YName = targetHeader,
+                Series = chartPoints,
+            };
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

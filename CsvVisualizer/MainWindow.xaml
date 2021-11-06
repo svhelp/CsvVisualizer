@@ -22,24 +22,34 @@
 
         <ComboBox Grid.Column="1" ItemsSource="{Binding Path=Headers}" SelectedValue="{Binding Path=SelectedHeader}" />
 
-        <syncfusion:SfChart Grid.Column="1" Grid.Row="1">
+        <ListBox ItemsSource="{Binding Charts}" Grid.Column="1" Grid.Row="1">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
 
-            <syncfusion:SfChart.PrimaryAxis>
+                    <syncfusion:SfChart Grid.Column="1" Grid.Row="1">
 
-                <syncfusion:CategoryAxis Header="{Binding SelectedHeader}" />
+                        <syncfusion:SfChart.PrimaryAxis>
 
-            </syncfusion:SfChart.PrimaryAxis>
+                            <syncfusion:CategoryAxis Header="{Binding XName}" />
 
-            <syncfusion:SfChart.SecondaryAxis>
+                        </syncfusion:SfChart.PrimaryAxis>
 
-                <syncfusion:NumericalAxis Header="Height(in cm)" />
+                        <syncfusion:SfChart.SecondaryAxis>
 
-            </syncfusion:SfChart.SecondaryAxis>
+                            <syncfusion:NumericalAxis Header="{Binding YName}" />
 
-            <syncfusion:LineSeries  ItemsSource="{Binding SingleChart}" XBindingPath="Time" YBindingPath="Value" >
-            </syncfusion:LineSeries>
+                        </syncfusion:SfChart.SecondaryAxis>
 
-        </syncfusion:SfChart>
+                        <syncfusion:FastLineSeries  ItemsSource="{Binding Series}" XBindingPath="Time" YBindingPath="Value" >
+                        </syncfusion:FastLineSeries>
+
+                    </syncfusion:SfChart>
+
+                </DataTemplate>                
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        
 
     </Grid>
 </Window>
