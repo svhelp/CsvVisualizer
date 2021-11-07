@@ -1,4 +1,5 @@
 ﻿using CsvVisualizer.Core;
+using CsvVisualizer.Core.Commands;
 using CsvVisualizer.Models;
 using Syncfusion.UI.Xaml.Charts;
 using System;
@@ -7,19 +8,25 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CsvVisualizer
 {
     class MainVindowViewModel
     {
+        private readonly Regex CsvPathPatterns = new Regex(@".+\.csv$", RegexOptions.Compiled);
+
         private string csvPath;
         private ObservableCollection<string> headers;
         private string selectedHeader;
         private ObservableCollection<ChartData> charts;
+        private RelayCommand drawCharts;
+        private ObservableCollection<string> selectedChartHeaders;
 
         public string CsvPath
         {
@@ -49,6 +56,15 @@ namespace CsvVisualizer
             }
         }
 
+        public ObservableCollection<string> SelectedChartHeaders
+        {
+            get => selectedChartHeaders ?? (selectedChartHeaders = new ObservableCollection<string>()); set
+            {
+                selectedChartHeaders = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<ChartData> Charts
         {
             get => charts ?? (charts = new ObservableCollection<ChartData>()); set
@@ -58,20 +74,43 @@ namespace CsvVisualizer
             }
         }
 
+        public RelayCommand DrawCharts
+        {
+            get => drawCharts ?? (drawCharts = new RelayCommand(obj =>
+            {
+                foreach (var header in SelectedChartHeaders)
+                {
+                    if (header == SelectedHeader)
+                    {
+                        continue;
+                    }
+
+                    var chartModel = GetChartModel(header);
+                    Charts.Add(chartModel);
+                }
+            }));
+        }
+
         private List<List<string>> CsvData { get; set; }
 
         private void OnCsvPathChanged()
         {
             CsvData = new List<List<string>>();
+            Headers.Clear();
+            SelectedChartHeaders.Clear();
+            Charts.Clear();
+
+            if (!CsvPathPatterns.IsMatch(CsvPath) || !File.Exists(CsvPath))
+            {
+                return;
+            }
 
             var csvData = CsvProcessor.GetCsvData(CsvPath);
-
-            Headers.Clear();
-            Charts.Clear();
 
             foreach (DataColumn column in csvData.Columns)
             {
                 Headers.Add(column.ColumnName);
+                SelectedChartHeaders.Add(column.ColumnName);
 
                 var columnData = new List<string>();
 
@@ -84,20 +123,6 @@ namespace CsvVisualizer
             }
 
             SelectedHeader = Headers[0];
-
-            Charts.Clear();
-
-            foreach (var header in Headers)
-            {
-                if (header == SelectedHeader)
-                {
-                    continue;
-                }
-
-                var chartModel = GetChartModel(header);
-
-                Charts.Add(chartModel);
-            }
         }
 
         private ChartData GetChartModel(string targetHeader)

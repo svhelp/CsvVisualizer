@@ -1,15 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CsvVisualizer.Models
+﻿namespace CsvVisualizer.Models
 {
+    /// <summary>
+    /// Chart point model.
+    /// </summary>
     class ChartPointData
     {
+        /// <summary>
+        /// X axis value.
+        /// </summary>
         public string Time { get; set; }
 
+        /// <summary>
+        /// Y axis value.
+        /// </summary>
         public double Value { get; set; }
     }
 }

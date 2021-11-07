@@ -5,8 +5,16 @@ using System.IO;
 
 namespace CsvVisualizer.Core
 {
+    /// <summary>
+    /// Csv file processor.
+    /// </summary>
     class CsvProcessor
     {
+        /// <summary>
+        /// Get DataTable from csv file.
+        /// </summary>
+        /// <param name="csvPath">Csv file path.</param>
+        /// <returns>DataTable with csv data.</returns>
         public static DataTable GetCsvData(string csvPath)
         {
             using var reader = new StreamReader(csvPath);
