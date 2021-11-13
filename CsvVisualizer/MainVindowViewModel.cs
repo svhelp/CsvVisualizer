@@ -1,32 +1,25 @@
 ﻿using CsvVisualizer.Core;
 using CsvVisualizer.Core.Commands;
 using CsvVisualizer.Models;
-using Syncfusion.UI.Xaml.Charts;
-using System;
+using CsvVisualizer.ViewModels;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CsvVisualizer
 {
-    class MainVindowViewModel
+    class MainVindowViewModel : INotifyPropertyChanged
     {
-        private readonly Regex CsvPathPatterns = new Regex(@".+\.csv$", RegexOptions.Compiled);
-
         private string csvPath;
-        private ObservableCollection<string> headers;
-        private string selectedHeader;
+        private ObservableCollection<CsvHeaderViewModel> headers;
+        private CsvHeaderViewModel selectedHeader;
         private ObservableCollection<ChartData> charts;
         private RelayCommand drawCharts;
-        private ObservableCollection<string> selectedChartHeaders;
+        private ObservableCollection<string> errors;
 
         public string CsvPath
         {
@@ -38,29 +31,29 @@ namespace CsvVisualizer
             }
         }
 
-        public ObservableCollection<string> Headers
+        public ObservableCollection<string> Errors
         {
-            get => headers ?? (headers = new ObservableCollection<string>()); set
+            get => errors ?? (errors = new ObservableCollection<string>()); set
+            {
+                errors = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<CsvHeaderViewModel> Headers
+        {
+            get => headers ?? (headers = new ObservableCollection<CsvHeaderViewModel>()); set
             {
                 headers = value;
                 OnPropertyChanged();
             }
         }
 
-        public string SelectedHeader
+        public CsvHeaderViewModel SelectedHeader
         {
             get => selectedHeader; set
             {
                 selectedHeader = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ObservableCollection<string> SelectedChartHeaders
-        {
-            get => selectedChartHeaders ?? (selectedChartHeaders = new ObservableCollection<string>()); set
-            {
-                selectedChartHeaders = value;
                 OnPropertyChanged();
             }
         }
@@ -78,7 +71,7 @@ namespace CsvVisualizer
         {
             get => drawCharts ?? (drawCharts = new RelayCommand(obj =>
             {
-                foreach (var header in SelectedChartHeaders)
+                foreach (var header in Headers.Where(x => x.IsSelected))
                 {
                     if (header == SelectedHeader)
                     {
@@ -97,20 +90,22 @@ namespace CsvVisualizer
         {
             CsvData = new List<List<string>>();
             Headers.Clear();
-            SelectedChartHeaders.Clear();
             Charts.Clear();
+            Errors.Clear();
 
-            if (!CsvPathPatterns.IsMatch(CsvPath) || !File.Exists(CsvPath))
+            if (!CsvProcessor.TryGetCsvData(CsvPath, Errors, out DataTable csvData))
             {
                 return;
             }
 
-            var csvData = CsvProcessor.GetCsvData(CsvPath);
-
             foreach (DataColumn column in csvData.Columns)
             {
-                Headers.Add(column.ColumnName);
-                SelectedChartHeaders.Add(column.ColumnName);
+                var headerModel = new CsvHeaderViewModel
+                {
+                    Value = column.ColumnName,
+                };
+
+                Headers.Add(headerModel);
 
                 var columnData = new List<string>();
 
@@ -122,10 +117,10 @@ namespace CsvVisualizer
                 CsvData.Add(columnData);
             }
 
-            SelectedHeader = Headers[0];
+            SelectedHeader = Headers.First();
         }
 
-        private ChartData GetChartModel(string targetHeader)
+        private ChartData GetChartModel(CsvHeaderViewModel targetHeader)
         {
             int timeIndex = Headers.IndexOf(SelectedHeader);
             int dataIndex = Headers.IndexOf(targetHeader);
@@ -146,9 +141,9 @@ namespace CsvVisualizer
 
             return new ChartData
             {
-                Title = targetHeader,
-                XName = SelectedHeader,
-                YName = targetHeader,
+                Title = targetHeader.Value,
+                XName = SelectedHeader.Value,
+                YName = targetHeader.Value,
                 Series = chartPoints,
             };
         }

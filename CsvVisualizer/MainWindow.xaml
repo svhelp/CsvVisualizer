@@ -6,13 +6,14 @@
         xmlns:syncfusion="clr-namespace:Syncfusion.UI.Xaml.Charts;assembly=Syncfusion.SfChart.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <StackPanel>
+    <StackPanel>        
         <StackPanel Orientation="Horizontal">
+            
             <Label>Csv path:</Label>
             <TextBox Width="250px" Margin="5px" Text="{Binding Path=CsvPath}"/>
             
             <Label>Timestamp colmn header:</Label>
-            <ComboBox Width="200px" Margin="5px" ItemsSource="{Binding Path=Headers}" SelectedValue="{Binding Path=SelectedHeader}" />
+            <ComboBox Width="200px" Margin="5px" ItemsSource="{Binding Path=Headers}" DisplayMemberPath="Value" SelectedItem="{Binding Path=SelectedHeader}" />
 
             <Button Margin="5px" Padding="5px 0" Command="{Binding DrawCharts}">Apply</Button>
         </StackPanel>
@@ -23,7 +24,7 @@
                 <ListView ItemsSource="{Binding Headers}" Height="300px">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox Content="{Binding}"/>
+                            <CheckBox Content="{Binding Value}" IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListView>
@@ -56,5 +57,23 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+
+        <DockPanel>
+            <ListView DockPanel.Dock="Bottom" ItemsSource="{Binding Errors}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Content="{Binding}"/>
+                            <Button Grid.Column="1"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </DockPanel>
     </StackPanel>
 </Window>
