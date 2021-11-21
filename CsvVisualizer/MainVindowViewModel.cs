@@ -15,11 +15,12 @@ namespace CsvVisualizer
     class MainVindowViewModel : INotifyPropertyChanged
     {
         private string csvPath;
-        private ObservableCollection<CsvHeaderViewModel> headers;
         private CsvHeaderViewModel selectedHeader;
+        private ObservableCollection<CsvHeaderViewModel> headers;
         private ObservableCollection<ChartData> charts;
-        private RelayCommand drawCharts;
         private ObservableCollection<string> errors;
+        private RelayCommand drawCharts;
+        private RelayCommand hideError;
 
         public string CsvPath
         {
@@ -81,6 +82,15 @@ namespace CsvVisualizer
                     var chartModel = GetChartModel(header);
                     Charts.Add(chartModel);
                 }
+            }));
+        }
+
+        public RelayCommand HideError
+        { 
+            get => hideError ?? (hideError = new RelayCommand(obj =>
+            {
+                var errorToRemove = obj as string;
+                errors.Remove(errorToRemove);
             }));
         }
 

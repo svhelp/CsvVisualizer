@@ -6,74 +6,73 @@
         xmlns:syncfusion="clr-namespace:Syncfusion.UI.Xaml.Charts;assembly=Syncfusion.SfChart.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <StackPanel>        
-        <StackPanel Orientation="Horizontal">
+    <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
             
-            <Label>Csv path:</Label>
-            <TextBox Width="250px" Margin="5px" Text="{Binding Path=CsvPath}"/>
-            
-            <Label>Timestamp colmn header:</Label>
-            <ComboBox Width="200px" Margin="5px" ItemsSource="{Binding Path=Headers}" DisplayMemberPath="Value" SelectedItem="{Binding Path=SelectedHeader}" />
+            <StackPanel Orientation="Horizontal">
+                <Label>Csv path:</Label>
+                <TextBox Width="250px" Margin="5px" Text="{Binding Path=CsvPath}"/>
 
-            <Button Margin="5px" Padding="5px 0" Command="{Binding DrawCharts}">Apply</Button>
+                <Label>Timestamp colmn header:</Label>
+                <ComboBox Width="200px" Margin="5px" ItemsSource="{Binding Path=Headers}" DisplayMemberPath="Value" SelectedItem="{Binding Path=SelectedHeader}" />
+
+                <Button Margin="5px" Padding="5px 0" Command="{Binding DrawCharts}">Apply</Button>
+            </StackPanel>
+
+            <Expander Header="Additional settings">
+                <StackPanel>
+                    <Label>Draw charts for:</Label>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="450px">
+                        <ItemsControl ItemsSource="{Binding Headers}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Value}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Width="200px"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>                    
+                </StackPanel>
+            </Expander>
+
         </StackPanel>
-        
-        <Expander Header="Additional settings">
-            <StackPanel>
-                <Label>Draw charts for:</Label>
-                <ListView ItemsSource="{Binding Headers}" Height="300px">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <CheckBox Content="{Binding Value}" IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListView>
-            </StackPanel>            
-        </Expander>
 
-        <ListView ItemsSource="{Binding Charts}" Height="auto">
-            <ListView.ItemTemplate>
+        <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding Errors}" Background="#FFF496">
+            <ItemsControl.ItemTemplate>
                 <DataTemplate>
-
-                    <syncfusion:SfChart>
-
-                        <syncfusion:SfChart.PrimaryAxis>
-
-                            <syncfusion:CategoryAxis Header="{Binding XName}" />
-
-                        </syncfusion:SfChart.PrimaryAxis>
-
-                        <syncfusion:SfChart.SecondaryAxis>
-
-                            <syncfusion:NumericalAxis Header="{Binding YName}" />
-
-                        </syncfusion:SfChart.SecondaryAxis>
-
-                        <syncfusion:FastLineSeries  ItemsSource="{Binding Series}" XBindingPath="Time" YBindingPath="Value" >
-                        </syncfusion:FastLineSeries>
-
-                    </syncfusion:SfChart>
-
+                    <DockPanel LastChildFill="True">
+                        <Button DockPanel.Dock="Right" Content="Hide" Margin="7px 2px" Padding="5px 0"
+                                Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.HideError}" CommandParameter="{Binding}" />
+                        <Label Content="{Binding}"/>
+                    </DockPanel>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
-        <DockPanel>
-            <ListView DockPanel.Dock="Bottom" ItemsSource="{Binding Errors}">
-                <ListView.ItemTemplate>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Charts}" >
+                <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
 
-                            <Label Content="{Binding}"/>
-                            <Button Grid.Column="1"/>
-                        </Grid>
+                        <syncfusion:SfChart Height="600px" Width="1000px">
+                            <syncfusion:SfChart.PrimaryAxis>
+                                <syncfusion:CategoryAxis Header="{Binding XName}" />
+                            </syncfusion:SfChart.PrimaryAxis>
+                            <syncfusion:SfChart.SecondaryAxis>
+                                <syncfusion:NumericalAxis Header="{Binding YName}" />
+                            </syncfusion:SfChart.SecondaryAxis>
+                            <syncfusion:FastLineSeries  ItemsSource="{Binding Series}" XBindingPath="Time" YBindingPath="Value" />
+                        </syncfusion:SfChart>
+
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </DockPanel>
-    </StackPanel>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+    </DockPanel>
 </Window>
