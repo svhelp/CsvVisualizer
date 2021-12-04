@@ -6,12 +6,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace CsvVisualizer
 {
+    /// <summary>
+    /// Main window view model.
+    /// </summary>
     class MainVindowViewModel : INotifyPropertyChanged
     {
         private string csvPath;
@@ -22,6 +24,9 @@ namespace CsvVisualizer
         private RelayCommand drawCharts;
         private RelayCommand hideError;
 
+        /// <summary>
+        /// Path to csv file.
+        /// </summary>
         public string CsvPath
         {
             get => csvPath; set
@@ -32,6 +37,9 @@ namespace CsvVisualizer
             }
         }
 
+        /// <summary>
+        /// Current errors list.
+        /// </summary>
         public ObservableCollection<string> Errors
         {
             get => errors ?? (errors = new ObservableCollection<string>()); set
@@ -41,6 +49,9 @@ namespace CsvVisualizer
             }
         }
 
+        /// <summary>
+        /// Csv headers.
+        /// </summary>
         public ObservableCollection<CsvHeaderViewModel> Headers
         {
             get => headers ?? (headers = new ObservableCollection<CsvHeaderViewModel>()); set
@@ -50,6 +61,9 @@ namespace CsvVisualizer
             }
         }
 
+        /// <summary>
+        /// Csv header considered as 'time'.
+        /// </summary>
         public CsvHeaderViewModel SelectedHeader
         {
             get => selectedHeader; set
@@ -59,6 +73,9 @@ namespace CsvVisualizer
             }
         }
 
+        /// <summary>
+        /// Chart models.
+        /// </summary>
         public ObservableCollection<ChartData> Charts
         {
             get => charts ?? (charts = new ObservableCollection<ChartData>()); set
@@ -68,23 +85,33 @@ namespace CsvVisualizer
             }
         }
 
+        /// <summary>
+        /// Draw charts command.
+        /// </summary>
         public RelayCommand DrawCharts
         {
             get => drawCharts ?? (drawCharts = new RelayCommand(obj =>
             {
+                Charts.Clear();
+
+                var headers = Headers.Select(x => x.Value).ToList();
+
                 foreach (var header in Headers.Where(x => x.IsSelected))
                 {
-                    if (header == SelectedHeader)
+                    if (header == SelectedHeader ||
+                            !ChartFactory.TryGetChartModel(headers, CsvData, header.Value, SelectedHeader.Value, Errors, out ChartData chartModel))
                     {
                         continue;
                     }
 
-                    var chartModel = GetChartModel(header);
                     Charts.Add(chartModel);
                 }
             }));
         }
 
+        /// <summary>
+        /// Hide error command.
+        /// </summary>
         public RelayCommand HideError
         { 
             get => hideError ?? (hideError = new RelayCommand(obj =>
@@ -130,35 +157,15 @@ namespace CsvVisualizer
             SelectedHeader = Headers.First();
         }
 
-        private ChartData GetChartModel(CsvHeaderViewModel targetHeader)
-        {
-            int timeIndex = Headers.IndexOf(SelectedHeader);
-            int dataIndex = Headers.IndexOf(targetHeader);
-            int pointsCount = CsvData[0].Count;
-
-            var chartPoints = new List<ChartPointData>();
-
-            for (int i = 0; i < pointsCount - 1; i++)
-            {
-                var point = new ChartPointData
-                {
-                    Time = CsvData[timeIndex][i],
-                    Value = double.Parse(CsvData[dataIndex][i], NumberStyles.Any, CultureInfo.InvariantCulture),
-                };
-
-                chartPoints.Add(point);
-            }
-
-            return new ChartData
-            {
-                Title = targetHeader.Value,
-                XName = SelectedHeader.Value,
-                YName = targetHeader.Value,
-                Series = chartPoints,
-            };
-        }
-
+        /// <summary>
+        /// Property changed event.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// On property changed.
+        /// </summary>
+        /// <param name="prop">Changed prop name.</param>
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             if (PropertyChanged != null)

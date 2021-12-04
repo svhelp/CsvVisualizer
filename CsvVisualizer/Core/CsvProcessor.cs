@@ -67,7 +67,7 @@ namespace CsvVisualizer.Core
         /// </summary>
         /// <param name="csvPath">Csv file path.</param>
         /// <returns>DataTable with csv data.</returns>
-        public static DataTable GetCsvData(string csvPath)
+        private static DataTable GetCsvData(string csvPath)
         {
             using var reader = new StreamReader(csvPath);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
